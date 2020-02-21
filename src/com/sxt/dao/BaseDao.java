@@ -90,17 +90,7 @@ public  class BaseDao {
 	}
 	
 	
-	/**
-	 * @Title: selectList
-	 * @author: Mr.T   
-	 * @date: 2020年2月4日 下午3:54:28 
-	 * @Description: 查询列表
-	 * @param <T>
-	 * @param sql
-	 * @param cls
-	 * @param param
-	 * @return: void
-	 */
+	
 	public  <T> List<T>  selectList(String sql,Class<T> cls,Object... param) {
 		Connection conn = JdbcUtil.getConn();
 		List<T> list = new ArrayList<T>();
@@ -108,29 +98,28 @@ public  class BaseDao {
 		ResultSet rs = null;
 		try {
 			prep = conn.prepareStatement(sql);
-			//设置查询参数
+			// set parameters
 			for (int i = 0; i < param.length; i++) {
 				prep.setObject(i+1, param[i]);
 			}
-			//获取查询结果
+			// query result set
 			rs = prep.executeQuery();
-			//获取查询结果的元信息
 			ResultSetMetaData metaData = rs.getMetaData();
-			//获取列的个数
+			// get column number which will be used in following loop
 			int columnCount = metaData.getColumnCount();
 			while(rs.next()) {
-				//创建对象
+				// Generate object
 				T t = cls.getConstructor().newInstance();
-				//循环获取列的值  且为对象赋值
+				// set object fields using reflection
 				for (int i = 1; i <= columnCount; i++) {
-					//获取列的别名
+					// Get column name
 					String columnLabel = metaData.getColumnLabel(i);
-					//根据columnLabel获取其对应的值
+					// get column value
 					Object object = rs.getObject(columnLabel);
-					//为对象赋值  为对象的属性赋值  
-					//1.根据列的别名找到类中的属性
+					// set value  
+					//find attribute by using column name
 					Field field = cls.getDeclaredField(columnLabel);
-					//2.为该属性赋值
+					//2. set attribute value
 					field.setAccessible(true);
 					field.set(t, object);
 					field.setAccessible(false);
@@ -144,19 +133,7 @@ public  class BaseDao {
 		}
 		return list;
 	}
-	
-	/**
-	 * @Title: selectOne
-	 * @author: Mr.T   
-	 * @date: 2020年2月4日 下午4:51:43 
-	 * @Description: 通用的查询某条数据
-	 * @param <T>
-	 * @param sql
-	 * @param cls
-	 * @param param
-	 * @return
-	 * @return: T
-	 */
+
 	public  <T> T selectOne(String sql,Class<T> cls,Object... param) {
 		List<T> list = selectList(sql, cls, param);
 		if(list != null && !list.isEmpty()) {
